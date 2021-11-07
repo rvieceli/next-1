@@ -1,1 +1,90 @@
-// TODO
+.banner {
+  height: 25rem;
+  width: 100%;
+  object-fit: cover;
+}
+
+.postContainer {
+  padding: 5rem 2rem 3.75rem;
+
+  h1 {
+    font-size: 3rem;
+    color: var(--heading);
+  }
+
+  > div {
+    display: flex;
+    margin: 1.5rem 0 1rem;
+
+    div {
+      & + div {
+        margin-left: 1.625rem;
+      }
+    }
+  }
+  > time {
+    font-size: 0.875rem;
+    font-style: italic;
+  }
+
+  > section {
+    margin-top: 3.75rem;
+
+    h2 {
+      font-size: 2.25rem;
+    }
+
+    p {
+      margin-top: 3rem;
+      font-size: 1.125rem;
+      line-height: 140%;
+      text-align: justify;
+
+      a {
+        color: var(--highlight);
+      }
+    }
+  }
+}
+
+.footerContainer {
+  padding: 3rem 2rem;
+  border-top: 1px solid rgba(215, 215, 215, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  div a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    span {
+      color: var(--heading);
+      transition: color 0.2s;
+    }
+
+    strong {
+      margin-top: 0.5rem;
+      color: var(--highlight);
+      transition: color 0.2s;
+    }
+
+    &:hover {
+      span {
+        color: var(--highlight);
+      }
+      strong {
+        color: var(--heading);
+      }
+    }
+  }
+}
+
+.previous {
+  align-items: flex-start;
+}
+
+.next {
+  align-items: flex-end;
+}
