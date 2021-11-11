@@ -9,6 +9,7 @@ import { getPrismicClient } from '../services/prismic';
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import { TextWithIcon } from '../components/TextWithIcon';
+import { ExitPreviewButton } from '../components/ExitPreviewButton';
 import { formatDate } from '../utility/formatDate';
 
 interface Post {
@@ -28,6 +29,7 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview: boolean;
 }
 
 const formatPosts = (results: Post[]): Post[] =>
@@ -36,7 +38,10 @@ const formatPosts = (results: Post[]): Post[] =>
     first_publication_date: formatDate(new Date(post.first_publication_date)),
   }));
 
-export default function Home({ postsPagination }: HomeProps): JSX.Element {
+export default function Home({
+  postsPagination,
+  preview,
+}: HomeProps): JSX.Element {
   const [nextPage, setNextPage] = useState(postsPagination.next_page);
   const [posts, setPosts] = useState(formatPosts(postsPagination.results));
 
@@ -51,9 +56,9 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
   return (
     <>
       <Head>
-        <title>Home | spacetraveling.</title>{' '}
+        <title>Home | spacetraveling.</title>
       </Head>
-      <main className={commonStyles.container}>
+      <main className={`${commonStyles.container} ${styles.container}`}>
         <div className={styles.post}>
           {posts.map(post => (
             <Link key={post.uid} href={`/post/${post.uid}`}>
@@ -84,24 +89,31 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
             />
           </div>
         )}
+
+        <ExitPreviewButton enabled={preview} />
       </main>
     </>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps<HomeProps> = async ({
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
   const postsPagination = await prismic.query(
     Prismic.Predicates.at('document.type', 'posts'),
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
-      pageSize: 10,
+      pageSize: 2,
+      ref: previewData?.ref ?? null,
     }
   );
 
   return {
     props: {
       postsPagination,
+      preview,
     },
     revalidate: 30,
   };

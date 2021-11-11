@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import Prismic from '@prismicio/client';
 import { RichText } from 'prismic-dom';
 import { RichText as RichTextComponent, RichTextBlock } from 'prismic-reactjs';
@@ -12,8 +13,11 @@ import styles from './post.module.scss';
 import { formatDate } from '../../utility/formatDate';
 import { formatDateTime } from '../../utility/formatDateTime';
 import { TextWithIcon } from '../../components/TextWithIcon';
+import { ExitPreviewButton } from '../../components/ExitPreviewButton';
+import { useUtterances } from '../../hooks/useUtterances';
 
 interface Post {
+  id: string;
   first_publication_date: string | null;
   last_publication_date: string | null;
   data: {
@@ -40,10 +44,17 @@ interface PostProps {
   post: Post;
   previous?: PostWithTitle;
   next?: PostWithTitle;
+  preview: boolean;
 }
 
-export default function Post({ post, previous, next }: PostProps): JSX.Element {
+export default function Post({
+  post,
+  previous,
+  next,
+  preview,
+}: PostProps): JSX.Element {
   const router = useRouter();
+  useUtterances(post?.id);
 
   if (router.isFallback) {
     return <div className={commonStyles.container}>Carregando...</div>;
@@ -61,6 +72,9 @@ export default function Post({ post, previous, next }: PostProps): JSX.Element {
 
   return (
     <>
+      <Head>
+        <title>{post.data.title} | spacetraveling.</title>
+      </Head>
       <img
         className={styles.banner}
         src={post.data.banner.url}
@@ -90,30 +104,33 @@ export default function Post({ post, previous, next }: PostProps): JSX.Element {
             <RichTextComponent render={section.body} />
           </section>
         ))}
-      </main>
 
-      <footer className={`${commonStyles.container} ${styles.footerContainer}`}>
-        <div>
-          {!!previous && (
-            <Link href={`/post/${previous.uid}`}>
-              <a className={styles.previous}>
-                <span>{previous.data.title}</span>
-                <strong>Post anterior</strong>
-              </a>
-            </Link>
-          )}
-        </div>
-        <div>
-          {!!next && (
-            <Link href={`/post/${next.uid}`}>
-              <a className={styles.next}>
-                <span>{next.data.title}</span>
-                <strong>Próximo post</strong>
-              </a>
-            </Link>
-          )}
-        </div>
-      </footer>
+        <footer className={styles.footerContainer}>
+          <div>
+            {!!previous && (
+              <Link href={`/post/${previous.uid}`}>
+                <a className={styles.previous}>
+                  <span>{previous.data.title}</span>
+                  <strong>Post anterior</strong>
+                </a>
+              </Link>
+            )}
+          </div>
+          <div>
+            {!!next && (
+              <Link href={`/post/${next.uid}`}>
+                <a className={styles.next}>
+                  <span>{next.data.title}</span>
+                  <strong>Próximo post</strong>
+                </a>
+              </Link>
+            )}
+          </div>
+        </footer>
+        <div id={post.id} />
+
+        <ExitPreviewButton enabled={preview} />
+      </main>
     </>
   );
 }
@@ -134,12 +151,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async context => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
+  const slug = params.slug as string;
 
-  const slug = context.params.slug as string;
-
-  const post = await prismic.getByUID('posts', slug, {});
+  const post = await prismic.getByUID('posts', slug, previewData);
 
   const {
     results: [next = null],
@@ -148,6 +168,7 @@ export const getStaticProps: GetStaticProps = async context => {
     pageSize: 1,
     after: `${post.id}`,
     orderings: '[document.first_publication_date desc]',
+    ...previewData,
   });
 
   const {
@@ -157,6 +178,7 @@ export const getStaticProps: GetStaticProps = async context => {
     pageSize: 1,
     after: `${post.id}`,
     orderings: '[document.first_publication_date]',
+    ...previewData,
   });
 
   return {
@@ -164,6 +186,7 @@ export const getStaticProps: GetStaticProps = async context => {
       post,
       previous,
       next,
+      preview,
     },
     revalidate: 60 * 30, // 30 minutes
   };

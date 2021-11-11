@@ -1,13 +1,15 @@
+.container {
+  padding-bottom: 2rem;
+}
+
 .post {
-  // max-width: 720px;
-  // margin: 0 auto;
-  padding: 0 2rem;
+  padding-bottom: 3rem;
 
   a {
     display: block;
 
     & + a {
-      margin-top: 3rem;
+      margin-top: 5rem;
     }
 
     strong {
@@ -46,8 +48,8 @@
 }
 
 .more {
-  margin: 4rem auto;
-  padding: 0 2rem;
+  margin: 0 auto;
+  padding-bottom: 4rem;
 
   input[type='button'] {
     background: none;

@@ -1,8 +1,9 @@
 .headerContainer {
   height: 7rem;
 }
+
 .headerContent {
-  max-width: 720px;
+  max-width: 800px;
   height: 7rem;
   margin: 0 auto;
   padding: 0 2rem;
@@ -10,7 +11,7 @@
   display: flex;
   align-items: center;
 
-  a img {
+  > a img {
     height: 1.6rem;
     transition: filter 0.2s;
 
